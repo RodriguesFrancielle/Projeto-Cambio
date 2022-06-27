@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    *{
+      margin: 1px;
+      padding: 3px;
+    }
+              body {
+            background-color: aliceblue;
+            justify-content: center;
+            align-content: center;
+            align-items: center;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            font-family: 'Roboto Condensed', sans-serif;
+            font-weight: 70;
+            
+
+          }
+
+          label {
+            font-size: 20px;
+          }
+
+          legend h1 {
+            font-weight: 700;
+          }
+
+
+          fieldset {
+            margin: 10px;
+            border-radius: 6px;
+            
+          }
+
+          .idButtonCotacao {
+
+              border: 2px none;
+              font: inherit;
+              line-height: 1;
+              margin: 0.5em;
+              padding: 1em 2em;
+              border-radius: 8px;
+              background-color: #fae881;
+              transition: 0.25s;
+              border-color: aliceblue;
+              cursor: pointer;
+              }
+
+              .idButtonCotacao:hover {
+              background-color: #f7d957;
+            }
+          
+
+  </style>
+    </head>
+      <body>
+        <fieldset>
+          <legend> <h1>Casa de cambio</h1></legend>
+        <form action="">
+            <div>
+                <div> 
+                  <!-----------Select da Primeira Moeda-->
+                    <label for="idMoeda">Selecione a Moeda de Entrada:</label>
+                    <div>
+                    <select id="idMoeda">
+                      <option value="EUR">EURO</option>
+                      <option value="AUD">Dólar australiano</option>
+                      <option value="CAD">Dólar canadense</option>
+                      <option value="CHF">Franco suíço</option>
+                      <option value="DKK">Coroa dinamarquesa</option>
+                      <option value="GBP">Libra Esterlina</option>
+                      <option value="JPY">Iene</option>
+                      <option value="NOK">Coroa norueguesa</option>
+                      <option value="SEK">Coroa sueca</option>
+                      <option value="USD">Dólar dos Estados Unidos</option>
+                  </select>
+                </div>
+                </div> 
+              
+                <div>
+                  <!-----------Entrada da Data-->
+                  <label for="idData">Data: </label>
+                  <div>
+                  <input type="text" id="idData">
+                  <p> EX: Mes-Data-Ano</p>
+                </div>
+                </div>
+
+                <!-----------Select da Segunda Moeda-->
+                <div> 
+                  <label for="idMoeda2">Selecione a Moeda de Saída:</label>
+                  <div>
+                  <select id="idMoeda2">
+                    <option value="EUR">EURO</option>
+                    <option value="AUD">Dólar australiano</option>
+                    <option value="CAD">Dólar canadense</option>
+                    <option value="CHF">Franco suíço</option>
+                    <option value="DKK">Coroa dinamarquesa</option>
+                    <option value="GBP">Libra Esterlina</option>
+                    <option value="JPY">Iene</option>
+                    <option value="NOK">Coroa norueguesa</option>
+                    <option value="SEK">Coroa sueca</option>
+                    <option value="USD">Dólar dos Estados Unidos</option>
+                </select>
+              </div>
+              </div> 
+
+                  <!-----------Valor para conversão-->
+              <div>
+                <label for="idValor">Digite o Valor da Conversão:</label>
+                <div>
+                <input type="number" id="idValor">
+              </div>
+            </div>
+
+                  <!-----------Button-->
+              <div>
+                <input class="idButtonCotacao" type="button" value="Buscar Cotação" id="idBtCotacao">
+              </div>
+
+              <!-----------Output - saída do resultado -->
+              <div>
+                <output id="idOut"></output>
+              </div>
+          </div>
+        </form>
+      </fieldset>
+
+              <script>
+                //Declaração das variaveis globais
+                  var btCotacao = document.getElementById("idBtCotacao")
+                  var resultadoMoeda1 = []
+                  var resultadoMoeda2 = []
+                  var out = document.getElementById("idOut")
+
+
+                // entrada dos dados e mandando para função
+                  btCotacao.onclick = function () {
+                    let moeda = document.getElementById("idMoeda").value
+                    let moeda2 = document.getElementById("idMoeda2").value
+                    let dataCotacao = document.getElementById("idData").value
+                    
+                            buscarInfo(moeda, dataCotacao)
+                            buscarInfo2(moeda2, dataCotacao)
+                            
+
+                    }
+
+                    //Função para trazer a primeira moeda 
+                        function buscarInfo(moeda, dataCotacao) {
+                          console.log(moeda);
+                          console.log(dataCotacao);
+                        
+                        
+                            var xhr = new XMLHttpRequest(); 
+
+                            xhr.open("GET", "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoMoedaDia(moeda=@moeda,dataCotacao=@dataCotacao)?@moeda='" +moeda+ "'&@dataCotacao='" +dataCotacao+ "'&$top=100&$format=json&$select=paridadeCompra,paridadeVenda,cotacaoCompra,cotacaoVenda,dataHoraCotacao,tipoBoletim")
+
+                            xhr.addEventListener("load", function(){
+                                var resposta = xhr.responseText;
+                              mostrarResultado(resposta)
+                          
+                            })
+                            
+                            xhr.send()
+                
+                          }
+
+                            function mostrarResultado(respostaCotacao) {
+                             //transformação do json em js
+                              let contacaoObj = JSON.parse(respostaCotacao)
+
+                              
+                              //resultado do js
+                              let msn = "("
+                              contacaoObj.value.forEach(function(cot1){
+                                    msn = msn + cot1.cotacaoCompra + ";"
+                                })
+
+                                // depositando num array
+                                resultadoMoeda1.push(msn)
+                                console.log(resultadoMoeda1);
+                              }
+
+
+
+                              //Função para trazer a segunda moeda --
+                              function buscarInfo2(moeda2, dataCotacao) {
+                                var yhr = new XMLHttpRequest(); 
+
+                              yhr.open("GET", "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoMoedaDia(moeda=@moeda,dataCotacao=@dataCotacao)?@moeda='" +moeda2+ "'&@dataCotacao='" +dataCotacao+ "'&$top=100&$format=json&$select=paridadeCompra,paridadeVenda,cotacaoCompra,cotacaoVenda,dataHoraCotacao,tipoBoletim")
+
+                                yhr.addEventListener("load", function(){
+                                var resposta2 = yhr.responseText;
+                                  mostrarResultado2(resposta2)
+                          
+                            })
+                            
+                            yhr.send()
+
+                          }
+
+                            function mostrarResultado2(respostaCotacao2) {
+                              //transformação do json em js 
+                              let contacaoObj2 = JSON.parse(respostaCotacao2)
+
+                              //resultado do js
+                              let msn2 = "("
+                              contacaoObj2.value.forEach(function(cot2){
+                                    msn2 = msn2 + cot2.cotacaoCompra + ";"
+                                })
+                                msn2 = msn2 + ")"
+
+                                 // Depositando num array
+                                resultadoMoeda2.push(msn2)
+                                console.log(resultadoMoeda2);
+
+                              }
+
+
+
+                              //Trazer o valor da conversão e os arrays p/ realizar o calculo da conversao 
+                              function resultado() {
+
+                                        
+                               /* let valorConversao = Number(document.getElementById("idValor").value)
+
+
+                                  for (let index = 0; index < resultadoMoeda1.length; index++) {
+                                    const element1 = resultadoMoeda1[index];
+                                    for (let index = 0; index < resultadoMoeda2.length; index++) {
+                                    const element2 = resultadoMoeda2[index];
+                                    
+
+                                    if (resultadoMoeda1 !== resultadoMoeda2) {
+
+                                   let conv = (resultadoMoeda1 / resultadoMoeda2) * valorConversao
+                                      
+                                      out.value = conv
+                                      console.log(conv);
+                                    }}}*/
+                                  }
+                
+
+            </script>
+
+
+
+      </body>
+</html>
