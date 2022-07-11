@@ -136,122 +136,68 @@
               <script>
                 //Declaração das variaveis globais
                   var btCotacao = document.getElementById("idBtCotacao")
-                  var resultadoMoeda1 = []
-                  var resultadoMoeda2 = []
+                  var moeda
+                  var moeda2
+                  var dataCotacao
+                  var valorConversao
+                  var buscarInfo
+                  var buscarInfo2
+                  var ObjBuscarInfo
+                  var ObjBuscarInfo2
+                  var resultado
                   var out = document.getElementById("idOut")
 
+                // entrada dos dados e trazendo obj da função atravez do await
+                  btCotacao.onclick = async function () {
+                     moeda = document.getElementById("idMoeda").value
+                     moeda2 = document.getElementById("idMoeda2").value
+                     dataCotacao = document.getElementById("idData").value
+                     valorConversao = Number(document.getElementById("idValor").value)
 
-                // entrada dos dados e mandando para função
-                  btCotacao.onclick = function () {
-                    let moeda = document.getElementById("idMoeda").value
-                    let moeda2 = document.getElementById("idMoeda2").value
-                    let dataCotacao = document.getElementById("idData").value
-                    
-                            buscarInfo(moeda, dataCotacao)
-                            buscarInfo2(moeda2, dataCotacao)
-                            
+                      ObjBuscarInfo = await buscarInfo(moeda, dataCotacao)
+                      ObjBuscarInfo2 = await buscarInfo2(moeda2, dataCotacao)
+
+                      out.value = calculo(valorConversao)
 
                     }
 
-                    //Função para trazer a primeira moeda 
-                        function buscarInfo(moeda, dataCotacao) {
+                    //utilizando await fetch e return json p/  pegar a primeira moeda
+                        async function buscarInfo(moeda, dataCotacao) {
                           console.log(moeda);
                           console.log(dataCotacao);
+
+                            let resultado1 = await fetch("https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoMoedaDia(moeda=@moeda,dataCotacao=@dataCotacao)?@moeda='" +moeda+ "'&@dataCotacao='" +dataCotacao+ "'&$top=100&$format=json&$select=paridadeCompra,paridadeVenda,cotacaoCompra,cotacaoVenda,dataHoraCotacao,tipoBoletim")    
+                            return resultado1.json()          
+                        }
+
+                          //utilizando await fetch e return json p/  pegar a segunda moeda
+                        async function buscarInfo2(moeda2, dataCotacao) {
+                          console.log(moeda2);
+                          console.log(dataCotacao);
+                          let resultado2 = await fetch("https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoMoedaDia(moeda=@moeda,dataCotacao=@dataCotacao)?@moeda='"+moeda2+"'&@dataCotacao='"+dataCotacao+"'&$top=100&$format=json&$select=paridadeCompra,paridadeVenda,cotacaoCompra,cotacaoVenda,dataHoraCotacao,tipoBoletim")
+                            return resultado2.json()
+                        }
+
+
+                      function calculo(valorConversao){
+                        //trazendo os obj p/ realizar o calculo da conversão entre as duas moedas.
+                        let buscarInfo = ObjBuscarInfo.value[ObjBuscarInfo.value.length - 1].cotacaoCompra
+                        let buscarInfo2 =  ObjBuscarInfo2.value[ObjBuscarInfo2.value.length - 1].cotacaoCompra
+                        console.log(buscarInfo);
+                        console.log(buscarInfo2);
+
                         
+                        // verificar se as moedas são identicas e informar processo impossível, caso contrario realizar o calculo
+                        if (moeda == moeda2) {
+                          resultado = "Resultado: Processo impossível, Moedas Selecionadas são idênticas"
+                        } else {
+                          conversao = Number((buscarInfo /buscarInfo2) * valorConversao)
+                          resultado = "Resultado: " + conversao
+                        }
+                        return resultado
                         
-                            var xhr = new XMLHttpRequest(); 
-
-                            xhr.open("GET", "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoMoedaDia(moeda=@moeda,dataCotacao=@dataCotacao)?@moeda='" +moeda+ "'&@dataCotacao='" +dataCotacao+ "'&$top=100&$format=json&$select=paridadeCompra,paridadeVenda,cotacaoCompra,cotacaoVenda,dataHoraCotacao,tipoBoletim")
-
-                            xhr.addEventListener("load", function(){
-                                var resposta = xhr.responseText;
-                              mostrarResultado(resposta)
-                          
-                            })
-                            
-                            xhr.send()
-                
-                          }
-
-                            function mostrarResultado(respostaCotacao) {
-                             //transformação do json em js
-                              let contacaoObj = JSON.parse(respostaCotacao)
-
-                              
-                              //resultado do js
-                              let msn = "("
-                              contacaoObj.value.forEach(function(cot1){
-                                    msn = msn + cot1.cotacaoCompra + ";"
-                                })
-
-                                // depositando num array
-                                resultadoMoeda1.push(msn)
-                                console.log(resultadoMoeda1);
-                              }
-
-
-
-                              //Função para trazer a segunda moeda --
-                              function buscarInfo2(moeda2, dataCotacao) {
-                                var yhr = new XMLHttpRequest(); 
-
-                              yhr.open("GET", "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoMoedaDia(moeda=@moeda,dataCotacao=@dataCotacao)?@moeda='" +moeda2+ "'&@dataCotacao='" +dataCotacao+ "'&$top=100&$format=json&$select=paridadeCompra,paridadeVenda,cotacaoCompra,cotacaoVenda,dataHoraCotacao,tipoBoletim")
-
-                                yhr.addEventListener("load", function(){
-                                var resposta2 = yhr.responseText;
-                                  mostrarResultado2(resposta2)
-                          
-                            })
-                            
-                            yhr.send()
-
-                          }
-
-                            function mostrarResultado2(respostaCotacao2) {
-                              //transformação do json em js 
-                              let contacaoObj2 = JSON.parse(respostaCotacao2)
-
-                              //resultado do js
-                              let msn2 = "("
-                              contacaoObj2.value.forEach(function(cot2){
-                                    msn2 = msn2 + cot2.cotacaoCompra + ";"
-                                })
-                                msn2 = msn2 + ")"
-
-                                 // Depositando num array
-                                resultadoMoeda2.push(msn2)
-                                console.log(resultadoMoeda2);
-
-                              }
-
-
-
-                              //Trazer o valor da conversão e os arrays p/ realizar o calculo da conversao 
-                              function resultado() {
-
-                                        
-                               /* let valorConversao = Number(document.getElementById("idValor").value)
-
-
-                                  for (let index = 0; index < resultadoMoeda1.length; index++) {
-                                    const element1 = resultadoMoeda1[index];
-                                    for (let index = 0; index < resultadoMoeda2.length; index++) {
-                                    const element2 = resultadoMoeda2[index];
-                                    
-
-                                    if (resultadoMoeda1 !== resultadoMoeda2) {
-
-                                   let conv = (resultadoMoeda1 / resultadoMoeda2) * valorConversao
-                                      
-                                      out.value = conv
-                                      console.log(conv);
-                                    }}}*/
-                                  }
-                
+                      }
 
             </script>
-
-
-
       </body>
 </html>
